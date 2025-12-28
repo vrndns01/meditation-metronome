@@ -5,430 +5,516 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Meditation Metronome</title>
   <style>
-    :root{ --bg:#0b1220; --panel:#0f172a; --ink:#e5e7eb; --muted:#9ca3af; --accent:#8b5cf6; --line:#1f2937; }
+    :root{
+      --bg:#0b0f16;
+      --panel:#0f1624;
+      --ink:#e8eefc;
+      --muted:#a6b0c3;
+      --line:rgba(255,255,255,.12);
+      --accent:#7c5cff;
+    }
+    *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0; font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background:radial-gradient(1200px 800px at 70% -10%, #1f2937 0%, #0b1220 60%); color:var(--ink); display:grid; place-items:center;}
-    .wrap{width:min(760px,92vw);} 
-    .card{background:color-mix(in oklab, var(--panel) 90%, black 10%); border:1px solid var(--line); border-radius:18px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,.35);} 
-    h1{margin:0 0 6px; font-weight:650; letter-spacing:.2px}
-    p.sub{margin:0 0 18px; color:var(--muted)}
-    .controls{display:grid; grid-template-columns:1fr auto; gap:14px; margin:16px 0; align-items:end}
-    .stack{display:grid; gap:6px; min-width:0}
-    label{font-size:12px; color:var(--muted)}
-    input[type="range"]{width:100%; min-width:0}
-    input[type="number"], select{width:100%; background:#0b1220; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:16px; box-sizing:border-box; max-width:100%}
-    .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 16px; border-radius:12px; border:1px solid var(--line); background:#111827; color:var(--ink); cursor:pointer; user-select:none}
-    .btn.primary{background:linear-gradient(180deg, color-mix(in oklab, var(--accent) 70%, black 30%), color-mix(in oklab, var(--accent) 40%, black 60%)); border-color:transparent}
-    .btn:disabled{opacity:.5; cursor:not-allowed}
-    .tiny{font-size:12px; color:var(--muted)}
-    .meter{height:12px; background:#0b1220; border:1px solid var(--line); border-radius:999px; overflow:hidden}
-    .bar{height:100%; width:0%; background:conic-gradient(from 90deg at 50% 50%, var(--accent), #60a5fa 30%, #34d399 60%, var(--accent) 100%); transition:width .08s ease}
-    .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px}
-    .seg{background:#0b1220; border:1px solid var(--line); padding:10px 12px; border-radius:10px; display:flex; align-items:center; justify-content:space-between}
-    .footer{
-  display:grid;
-  gap:12px;
-  margin-top:14px;
-}
+    body{
+      margin:0;
+      font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 900px at 50% 20%, rgba(124,92,255,.18), transparent 55%),
+        radial-gradient(900px 700px at 50% 70%, rgba(255,255,255,.06), transparent 60%),
+        var(--bg);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px 16px;
+    }
+    .wrap{width:min(680px, 92vw)}
+    .title{font-weight:700; letter-spacing:.2px; margin:0; text-align:center}
+    .sub{margin:8px 0 22px; color:var(--muted); text-align:center; font-size:13px}
 
-/* Row 1: progress bar only */
-.footer-row1{ grid-column:1 / -1; }
+    .panel{
+      background:rgba(15,22,36,.55);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:0 30px 90px rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+    }
 
-/* Row 2: left (readout + counters) | right (timer + countdown) */
-.footer-row2{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
+    .play{
+      width:100%;
+      height:96px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.18);
+      color:var(--ink);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: transform .05s ease;
+      user-select:none;
+      touch-action: manipulation;
+    }
+    .play:active{transform:scale(.99)}
+    .play .icon{
+      width:0;height:0;
+      border-top:16px solid transparent;
+      border-bottom:16px solid transparent;
+      border-left:26px solid rgba(232,238,252,.92);
+      margin-left:6px;
+    }
+    .play.stop .icon{
+      width:26px;height:26px;
+      border:0;
+      background:rgba(232,238,252,.92);
+      border-radius:6px;
+      margin:0;
+    }
 
-.footer-left{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-}
+    .section{margin-top:18px}
+    .label{
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 10px;
+      text-align:center;
+      letter-spacing:.2px;
+    }
 
-.footer-right{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-}
+    .bpmRow{
+      display:grid;
+      grid-template-columns:56px 1fr 56px;
+      gap:14px;
+      align-items:center;
+    }
+    .big{
+      font-size:86px;
+      font-weight:650;
+      text-align:center;
+      margin:8px 0 6px;
+      font-variant-numeric: tabular-nums;
+    }
 
-/* subtle counters */
-#counters{
-  font-size:12px;
-  letter-spacing:0.3px;
-  opacity:0.6;
-}
+    .btn{
+      height:54px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.12);
+      color:var(--ink);
+      cursor:pointer;
+      font-size:18px;
+      user-select:none;
+      touch-action: manipulation;
+    }
+    .btn:active{background:rgba(255,255,255,.06)}
+    .btn.selected{
+      border-color: rgba(124,92,255,.55);
+      box-shadow: 0 0 0 2px rgba(124,92,255,.18) inset;
+    }
 
-/* mobile: stack row 2 vertically */
-@media (max-width: 600px){
-  .footer-row2{ flex-direction:column; align-items:stretch; }
-}
-    .grid-params{display:grid; grid-template-columns:repeat(3, minmax(220px,1fr)); gap:16px; margin-top:10px; align-items:end}
-    .timebadge{padding:6px 10px; border:1px solid var(--line); border-radius:10px; background:#0b1220; font-variant-numeric:tabular-nums}
-    @media (max-width: 900px){ .grid-params{grid-template-columns:repeat(2, minmax(220px,1fr));} }
-    @media (max-width: 600px){
-        .controls{ grid-template-columns:1fr; align-items:stretch; }
-        .grid-params{ grid-template-columns:1fr; }
-        .grid{ grid-template-columns:1fr; }              /* Volume / Sound / Tap tempo -> single column */
-        .seg{ flex-direction:column; align-items:stretch; gap:8px; }  /* stack label/control inside each tile */
-        .footer{ flex-direction:column; align-items:stretch; gap:12px; } /* meter + timer + countdown -> vertical */
+    input[type="range"]{
+      width:100%;
+      accent-color: var(--ink);
+      height:22px;
+    }
+    .rangeRow{
+      margin-top:10px;
+      padding:0 4px;
+    }
+    .rangeMeta{
+      display:flex;
+      justify-content:space-between;
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+    }
+
+    .grid{
+      display:grid;
+      gap:14px;
+    }
+    .rowButtons{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .rowButtons .btn{
+      height:44px;
+      padding:0 14px;
+      font-size:14px;
+      min-width:58px;
+    }
+
+    .timerBar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:10px;
+    }
+    .countdown{
+      font-variant-numeric: tabular-nums;
+      color:var(--muted);
+      font-size:13px;
+      text-align:right;
+      min-width:64px;
+    }
+
+    .note{
+      margin-top:14px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    @media (max-width: 520px){
+      .big{font-size:74px}
+      .bpmRow{grid-template-columns:52px 1fr 52px; gap:10px}
+      .btn{height:52px}
+      .play{height:92px}
+      .rowButtons .btn{min-width:54px}
     }
   </style>
 </head>
+
 <body>
-  <main class="wrap">
-    <section class="card" aria-label="Meditation metronome">
-      <h1>Meditation Metronome</h1>
-      <p class="sub">A gentle, precise click designed for breathwork and focus.</p>
+  <div class="wrap">
+    <h1 class="title">Meditation Metronome</h1>
+    <p class="sub">Use metronome beats to concentrate and calm by adjusting the BPM.</p>
 
-      <div class="controls" role="group" aria-label="Tempo controls">
-        <div class="stack">
-          <label for="bpm">Beats per minute</label>
-          <input id="bpm" type="number" min="20" max="240" step="1" value="60" inputmode="numeric"/>
-        </div>
-        <div class="stack" aria-hidden="true">
-          <label>&nbsp;</label>
-          <button id="startStop" class="btn primary" aria-pressed="false"><span>Start</span></button>
-        </div>
-        <div class="stack" style="grid-column:1/-1">
-          <div class="bpm-row" style="display:flex; align-items:center; gap:10px">
-            <button id="bpmMinus" class="btn" aria-label="Decrease BPM" title="-1 (Shift = -5)" style="padding:8px 12px">−</button>
-            <input id="bpmSlider" type="range" min="01" max="240" value="60" step="1" aria-label="Tempo slider" style="flex:1"/>
-            <button id="bpmPlus" class="btn" aria-label="Increase BPM" title="+1 (Shift = +5)" style="padding:8px 12px">+</button>
+    <div class="panel">
+      <button id="play" class="play" aria-pressed="false" aria-label="Start">
+        <span class="icon" aria-hidden="true"></span>
+      </button>
+
+      <div class="section">
+        <p class="label">Beats per minute</p>
+        <div class="big" id="bpmBig">60</div>
+
+        <div class="bpmRow">
+          <button id="bpmMinus" class="btn" aria-label="Decrease BPM">−</button>
+          <div class="rangeRow">
+            <input id="bpmSlider" type="range" min="10" max="200" step="1" value="60" aria-label="BPM slider" />
+            <div class="rangeMeta"><span>10</span><span>200</span></div>
           </div>
+          <button id="bpmPlus" class="btn" aria-label="Increase BPM">+</button>
         </div>
       </div>
 
-      <div class="grid">
-        <div class="seg"><span class="tiny">Volume</span><input id="volume" type="range" min="0" max="1" value="0.5" step="0.01" aria-label="Volume"/></div>
-        <div class="seg"><span class="tiny">Sound</span>
-          <select id="voice" aria-label="Click sound">
-            <option value="soft">Soft tick</option>
-            <option value="wood">Wood block (gentle)</option>
-            <option value="ping">Bell ping</option>
-            <option value="sand">Sand click</option>
-            <option value="thump">Low thump</option>
-            <option value="clave">Clave (tok)</option>
-          </select>
-        </div>
-        <div class="seg"><span class="tiny">Tap tempo</span><button id="tap" class="btn" style="padding:8px 12px">Tap</button></div>
-      </div>
-
-      <div class="grid grid-params">
-        <div class="stack">
-            <label for="beatsPerCycle">Beats per cycle</label>
-            <div class="bpm-row" style="display:flex; align-items:center; gap:10px">
-              <button id="bcMinus" class="btn" aria-label="Decrease beats per cycle" title="−1 (Shift = −2)" style="padding:8px 12px">−</button>
-              <input id="beatsPerCycle" type="number" min="1" max="16" step="1" value="4" style="text-align:center; max-width:90px"/>
-              <button id="bcPlus" class="btn" aria-label="Increase beats per cycle" title="+1 (Shift = +2)" style="padding:8px 12px">+</button>
-            </div>
-        </div>
-        <div class="stack">
-          <label for="accentGain">Accent strength</label>
-          <input id="accentGain" type="range" min="0" max="1" step="0.05" value="0.9" />
+      <div class="section">
+        <p class="label">Volume</p>
+        <div class="rangeRow">
+          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.6" aria-label="Volume slider" />
+          <div class="rangeMeta"><span>0</span><span>100</span></div>
         </div>
       </div>
 
-      <div class="footer">
-        <!-- Row 1: progress bar only -->
-        <div class="footer-row1">
-          <div class="meter" aria-hidden="true"><div class="bar" id="progress"></div></div>
-        </div>
-      
-        <!-- Row 2: left | right -->
-        <div class="footer-row2">
-          <!-- Left: BPM readout + counters -->
-          <div class="footer-left">
-            <div class="tiny" id="readout" aria-live="polite">60 BPM • beat 1/4</div>
-            <!-- If you already had counters, just keep your IDs; this is the subtle version -->
-            <div id="counters" class="tiny" style="margin-left:0">
-              Beats: <span id="beatsTotal">0</span> • Sets: <span id="cyclesTotal">0</span>
-            </div>
-          </div>
-      
-          <!-- Right: session timer + countdown -->
-          <div class="footer-right">
-            <label for="session" class="tiny" style="margin-right:-6px">Session&nbsp;timer</label>
-            <select id="session">
-              <option value="0">No timer</option>
-              <option value="300">5 minutes</option>
-              <option value="600">10 minutes</option>
-              <option value="900">15 minutes</option>
-              <option value="1200">20 minutes</option>
-              <option value="1800">30 minutes</option>
-            </select>
-            <div class="timebadge" id="countdown" aria-live="polite">—:—</div>
-          </div>
+      <div class="section">
+        <p class="label">Beats per cycle</p>
+        <div class="rowButtons" id="cycleBtns" role="group" aria-label="Beats per cycle">
+          <button class="btn" data-cycle="3">3</button>
+          <button class="btn selected" data-cycle="4">4</button>
+          <button class="btn" data-cycle="5">5</button>
+          <button class="btn" data-cycle="6">6</button>
+          <button class="btn" data-cycle="7">7</button>
+          <button class="btn" data-cycle="8">8</button>
+          <button class="btn" data-cycle="9">9</button>
         </div>
       </div>
-    </section>
-  </main>
+
+      <div class="section">
+        <div class="timerBar">
+          <p class="label" style="margin:0; text-align:left">Timer</p>
+          <div class="countdown" id="countdown"> </div>
+        </div>
+        <div class="rowButtons" id="timerBtns" role="group" aria-label="Timer options">
+          <button class="btn selected" data-sec="0">Off</button>
+          <button class="btn" data-sec="300">5 min</button>
+          <button class="btn" data-sec="600">10 min</button>
+          <button class="btn" data-sec="900">15 min</button>
+          <button class="btn" data-sec="1800">30 min</button>
+          <button class="btn" data-sec="3600">1 hour</button>
+        </div>
+      </div>
+
+      <div class="note" id="note"></div>
+    </div>
+  </div>
 
   <script>
-    // Web Audio metronome with configurable accent, cycle length, and simple session timer
-    let audioCtx; let masterGain; let isRunning = false; let nextNoteTime = 0;
-    const scheduleAheadTime = 0.12; const lookahead = 25; let timerID = null; let beatCounter = 0;
-    let sessionInterval = null; let sessionEndsAt = 0; // epoch ms
+    let audioCtx, masterGain;
+    let isPlaying = false;
 
-    const bpmInput = document.getElementById('bpm');
+    let bpm = 60;
+    let cycle = 4;
+
+    let beatIndex = 0;
+    let nextNoteTime = 0;
+    const lookaheadMs = 25;
+    const scheduleAhead = 0.12;
+    let schedTimer = null;
+
+    let timerChoiceSec = 0;
+    let timerEndsAt = 0;
+    let timerTick = null;
+
+    let wakeLock = null;
+
+    const playBtn = document.getElementById('play');
+    const bpmBig = document.getElementById('bpmBig');
     const bpmSlider = document.getElementById('bpmSlider');
     const bpmMinus = document.getElementById('bpmMinus');
     const bpmPlus = document.getElementById('bpmPlus');
-    const startStopBtn = document.getElementById('startStop');
-    const readout = document.getElementById('readout');
-    const progress = document.getElementById('progress');
-    const volume = document.getElementById('volume');
-    const voice = document.getElementById('voice');
-    const tapBtn = document.getElementById('tap');
-    const beatsPerCycleInput = document.getElementById('beatsPerCycle');    const accentGainInput = document.getElementById('accentGain');
-    const sessionSel = document.getElementById('session');
-    const countdown = document.getElementById('countdown');
-    const bcMinus = document.getElementById('bcMinus');
-    const bcPlus  = document.getElementById('bcPlus');
+    const volSlider = document.getElementById('vol');
+    const cycleBtns = document.getElementById('cycleBtns');
+    const timerBtns = document.getElementById('timerBtns');
+    const countdownEl = document.getElementById('countdown');
+    const noteEl = document.getElementById('note');
 
-    const beatsTotalEl = document.getElementById('beatsTotal');
-    const cyclesTotalEl = document.getElementById('cyclesTotal');
-    let totalBeats = 0;
-    let totalCycles = 0;
+    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
-    function updateCounters(){
-      beatsTotalEl.textContent = totalBeats;
-      cyclesTotalEl.textContent = totalCycles;
-    }
-
-    bpmInput.addEventListener('input', syncTempo);
-    bpmSlider.addEventListener('input', syncTempo);
-
-    function syncTempo(e){ const v = clamp(parseInt(e.target.value || 60,10), 1, 240); bpmInput.value = v; bpmSlider.value = v; updateReadout(); }
-    function clamp(n, a, b){return Math.max(a, Math.min(b, n));}
-
-    function initAudio(){
-      if(!audioCtx){
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)({latencyHint:'interactive'});
-        masterGain = audioCtx.createGain(); masterGain.gain.value = parseFloat(volume.value); masterGain.connect(audioCtx.destination);
+    function ensureAudio(){
+      if (!audioCtx){
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = parseFloat(volSlider.value);
+        masterGain.connect(audioCtx.destination);
       }
     }
 
-    volume.addEventListener('input', ()=>{ if(masterGain) masterGain.gain.setTargetAtTime(parseFloat(volume.value), audioCtx.currentTime, 0.01); });
+    volSlider.addEventListener('input', () => {
+      if (!masterGain) return;
+      const v = parseFloat(volSlider.value);
+      masterGain.gain.setTargetAtTime(v, audioCtx.currentTime, 0.01);
+    });
 
-    function nextBeat(){ const secondsPerBeat = 60.0 / parseInt(bpmInput.value,10); nextNoteTime += secondsPerBeat; const beatsPerCycle = clamp(parseInt(beatsPerCycleInput.value,10)||4,1,16); beatCounter = (beatCounter % beatsPerCycle) + 1; }
+    function setBpm(v){
+      bpm = clamp(parseInt(v, 10) || 60, 10, 200);
+      bpmBig.textContent = bpm;
+      bpmSlider.value = bpm;
+    }
+
+    bpmSlider.addEventListener('input', (e) => setBpm(e.target.value));
+
+    function startBpmHold(delta){
+      const stepOnce = () => setBpm(bpm + delta);
+      stepOnce();
+      let holdT = setTimeout(() => {
+        bpmHoldRepeat = setInterval(stepOnce, 90);
+      }, 260);
+      bpmHoldTimeout = holdT;
+    }
+
+    let bpmHoldTimeout = null;
+    let bpmHoldRepeat = null;
+
+    function clearBpmHold(){
+      clearTimeout(bpmHoldTimeout);
+      clearInterval(bpmHoldRepeat);
+      bpmHoldTimeout = null;
+      bpmHoldRepeat = null;
+    }
+
+    bpmMinus.addEventListener('pointerdown', (e) => { e.preventDefault(); startBpmHold(-1); });
+    bpmPlus.addEventListener('pointerdown', (e) => { e.preventDefault(); startBpmHold(+1); });
+    ['pointerup','pointercancel','pointerleave','lostpointercapture'].forEach(ev => {
+      bpmMinus.addEventListener(ev, clearBpmHold);
+      bpmPlus.addEventListener(ev, clearBpmHold);
+    });
+
+    cycleBtns.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-cycle]');
+      if (!btn) return;
+      cycle = parseInt(btn.dataset.cycle, 10);
+      [...cycleBtns.querySelectorAll('button[data-cycle]')].forEach(b => b.classList.toggle('selected', b === btn));
+    });
+
+    timerBtns.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-sec]');
+      if (!btn) return;
+      timerChoiceSec = parseInt(btn.dataset.sec, 10) || 0;
+      [...timerBtns.querySelectorAll('button[data-sec]')].forEach(b => b.classList.toggle('selected', b === btn));
+
+      if (!isPlaying){
+        countdownEl.textContent = '';
+        return;
+      }
+
+      if (timerChoiceSec <= 0){
+        stopTimerOnly();
+        countdownEl.textContent = '';
+        return;
+      }
+
+      startTimer(timerChoiceSec);
+    });
+
+    function formatMMSS(sec){
+      const s = Math.max(0, Math.ceil(sec));
+      const mm = String(Math.floor(s / 60)).padStart(2, '0');
+      const ss = String(s % 60).padStart(2, '0');
+      return mm + ':' + ss;
+    }
+
+    function startTimer(sec){
+      stopTimerOnly();
+      timerEndsAt = Date.now() + sec * 1000;
+      tickTimer();
+      timerTick = setInterval(tickTimer, 200);
+    }
+
+    function tickTimer(){
+      const remaining = (timerEndsAt - Date.now()) / 1000;
+      if (remaining <= 0){
+        countdownEl.textContent = '00:00';
+        stopFromTimer();
+        return;
+      }
+      countdownEl.textContent = formatMMSS(remaining);
+    }
+
+    function stopTimerOnly(){
+      clearInterval(timerTick);
+      timerTick = null;
+      timerEndsAt = 0;
+    }
+
+    function stopFromTimer(){
+      stop();
+      countdownEl.textContent = '00:00';
+    }
+
+    async function requestWakeLock(){
+      try{
+        if (!('wakeLock' in navigator)) return;
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => {});
+      }catch(err){}
+    }
+
+    async function releaseWakeLock(){
+      try{
+        if (wakeLock){
+          await wakeLock.release();
+          wakeLock = null;
+        }
+      }catch(err){}
+    }
+
+    document.addEventListener('visibilitychange', async () => {
+      if (!isPlaying) return;
+      if (document.visibilityState === 'visible'){
+        await requestWakeLock();
+      }
+    });
 
     function scheduler(){
-      while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime){
-        const beatsPerCycle = clamp(parseInt(beatsPerCycleInput.value,10)||4,1,16);
-        const isAccent = ((beatCounter % beatsPerCycle) + 1) === 1;
-        scheduleClick(nextNoteTime, isAccent); nextBeat();
+      const now = audioCtx.currentTime;
+      while (nextNoteTime < now + scheduleAhead){
+        const isAccent = (beatIndex === 0);
+        claveTok(nextNoteTime, isAccent);
+
+        const spb = 60 / bpm;
+        nextNoteTime += spb;
+
+        beatIndex = (beatIndex + 1) % cycle;
       }
     }
 
-    function scheduleClick(time, isAccent){
-      const type = voice.value;
-      if(type === 'wood') woodClick(time, isAccent);
-      else if(type === 'ping') bellPing(time, isAccent);
-      else if(type === 'sand') sandClick(time, isAccent);
-      else if(type === 'thump') lowThump(time, isAccent);
-      else if(type === 'clave') claveTok(time, isAccent);
-      else softTick(time, isAccent);
-
-      const now = audioCtx.currentTime; const until = Math.max(0, time - now);
-      progress.style.transitionDuration = Math.max(50, (until*1000)).toFixed(0)+'ms';
-      progress.style.width = '100%';
-      setTimeout(()=>{progress.style.transitionDuration='0ms'; progress.style.width='0%';}, Math.max(60, until*1000));
-
-      const beatsPerCycle = clamp(parseInt(beatsPerCycleInput.value,10)||4,1,16);
-
-        // Count beats/sets exactly when the click fires
-        const bpc = clamp(parseInt(beatsPerCycleInput.value,10)||4,1,16);
-        // Beat being scheduled right now:
-        const localBeat = ((beatCounter % bpc) + 1);
-        setTimeout(()=>{
-          totalBeats += 1;
-          if(localBeat === 1){ totalCycles += 1; } // new cycle starts on beat 1
-          updateCounters();
-        }, Math.max(0, (time - audioCtx.currentTime)) * 1000);
-
-
-      readout.textContent = `${bpmInput.value} BPM • beat ${beatCounter}/${beatsPerCycle}`;
-    }
-
-    // === Sound engines ===
-    function softTick(time, isAccent){
-      const freq = isAccent ? 1100 : 900; const osc = audioCtx.createOscillator(); osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, time);
-      const env = audioCtx.createGain(); env.gain.setValueAtTime(0.0001, time); const acc = parseFloat(accentGainInput.value)||0.9; env.gain.exponentialRampToValueAtTime(isAccent?acc:0.7, time + 0.005); env.gain.exponentialRampToValueAtTime(0.0001, time + 0.08);
-      const bufferSize = 2048; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const data = buffer.getChannelData(0); for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * 0.5; }
-      const noise = audioCtx.createBufferSource(); noise.buffer = buffer; noise.loop = false; const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 4000; bp.Q.value = 5; const nGain = audioCtx.createGain(); nGain.gain.value = 0.08;
-      osc.connect(env); env.connect(masterGain); noise.connect(bp); bp.connect(nGain); nGain.connect(masterGain);
-      osc.start(time); osc.stop(time + 0.1); noise.start(time); noise.stop(time + 0.06);
-    }
-
-    function woodClick(time, isAccent){
-      const osc1 = audioCtx.createOscillator(); const osc2 = audioCtx.createOscillator(); osc1.type = 'sine'; osc2.type = 'sine'; osc1.frequency.setValueAtTime(isAccent?800:700, time); osc2.frequency.setValueAtTime(isAccent?1200:1050, time);
-      const env = audioCtx.createGain(); env.gain.setValueAtTime(0.0001, time); const acc = parseFloat(accentGainInput.value)||0.9; env.gain.exponentialRampToValueAtTime(isAccent?acc:0.7, time + 0.004); env.gain.exponentialRampToValueAtTime(0.0001, time + 0.09);
-      osc1.connect(env); osc2.connect(env); env.connect(masterGain); osc1.start(time); osc1.stop(time + 0.12); osc2.start(time); osc2.stop(time + 0.12);
-    }
-
-    function bellPing(time, isAccent){
-      const base = isAccent? 880 : 660; const osc = audioCtx.createOscillator(); osc.type = 'sine'; const gain = audioCtx.createGain(); gain.gain.setValueAtTime(0.0001, time);
-      const acc = parseFloat(accentGainInput.value)||0.9; gain.gain.exponentialRampToValueAtTime(isAccent?acc:0.6, time + 0.01); gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.35);
-      osc.frequency.setValueAtTime(base, time); osc.connect(gain); gain.connect(masterGain); osc.start(time); osc.stop(time + 0.4);
-    }
-
-    function sandClick(time, isAccent){
-      const bufferSize = 512; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const data = buffer.getChannelData(0); for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * 0.3; }
-      const noise = audioCtx.createBufferSource(); noise.buffer = buffer; const hp = audioCtx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2000; const env = audioCtx.createGain(); env.gain.setValueAtTime(0.0001, time);
-      const acc = parseFloat(accentGainInput.value)||0.9; env.gain.exponentialRampToValueAtTime(isAccent?Math.min(acc,0.6):0.3, time + 0.002); env.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
-      noise.connect(hp); hp.connect(env); env.connect(masterGain); noise.start(time); noise.stop(time + 0.06);
-    }
-
-    function lowThump(time, isAccent){
-      const osc = audioCtx.createOscillator(); osc.type = 'sine'; osc.frequency.setValueAtTime(isAccent?120:80, time); const env = audioCtx.createGain(); env.gain.setValueAtTime(0.0001, time);
-      const acc = parseFloat(accentGainInput.value)||0.9; env.gain.exponentialRampToValueAtTime(isAccent?Math.min(acc,0.7):0.5, time + 0.01); env.gain.exponentialRampToValueAtTime(0.0001, time + 0.2);
-      osc.connect(env); env.connect(masterGain); osc.start(time); osc.stop(time + 0.3);
-    }
-
-    function claveTok(time, isAccent){
-        // Short bright click: tiny sine pop + bandpass noise for bite
-        const acc = parseFloat(accentGainInput.value) || 0.9;
-
-        // Pop (short sine)
-        const osc = audioCtx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(isAccent ? 2600 : 2200, time);
-
-        const env = audioCtx.createGain();
-        env.gain.setValueAtTime(0.0001, time);
-        env.gain.exponentialRampToValueAtTime(isAccent ? acc : 0.6, time + 0.002);
-        env.gain.exponentialRampToValueAtTime(0.0001, time + 0.06);
-
-        // Bite (band-passed noise)
-        const nbuf = audioCtx.createBuffer(1, 256, audioCtx.sampleRate);
-        const ch = nbuf.getChannelData(0);
-        for(let i=0; i<ch.length; i++){ ch[i] = (Math.random()*2-1); }
-        const noise = audioCtx.createBufferSource();
-        noise.buffer = nbuf;
-
-        const bp = audioCtx.createBiquadFilter();
-        bp.type = 'bandpass';
-        bp.frequency.value = 3200;
-        bp.Q.value = 8;
-
-        const nGain = audioCtx.createGain();
-        nGain.gain.setValueAtTime(isAccent ? 0.18 : 0.12, time);
-        nGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
-
-        osc.connect(env); env.connect(masterGain);
-        noise.connect(bp); bp.connect(nGain); nGain.connect(masterGain);
-
-        osc.start(time); osc.stop(time + 0.08);
-        noise.start(time); noise.stop(time + 0.06);
-    }
-
-
     function start(){
-      initAudio(); isRunning = true; beatCounter = 0;
-      totalBeats = 0;
-      totalCycles = 0;
-      updateCounters();
-      
+      ensureAudio();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      isPlaying = true;
+      playBtn.classList.add('stop');
+      playBtn.setAttribute('aria-pressed', 'true');
+      playBtn.setAttribute('aria-label', 'Stop');
+
+      beatIndex = 0;
       nextNoteTime = audioCtx.currentTime + 0.06;
-      if(timerID) clearInterval(timerID); timerID = setInterval(scheduler, lookahead);
-      startStopBtn.firstElementChild.textContent = 'Stop'; startStopBtn.setAttribute('aria-pressed','true');
-      const dur = parseInt(sessionSel.value,10)||0; if(sessionInterval) { clearInterval(sessionInterval); sessionInterval = null; }
-      if(dur>0){ sessionEndsAt = Date.now() + dur*1000; updateCountdown(); sessionInterval = setInterval(()=>{ updateCountdown(); if(Date.now() >= sessionEndsAt){ endSession(); } }, 250); } else { countdown.textContent = '—:—'; }
+
+      clearInterval(schedTimer);
+      schedTimer = setInterval(scheduler, lookaheadMs);
+
+      if (timerChoiceSec > 0) startTimer(timerChoiceSec);
+      else countdownEl.textContent = '';
+
+      requestWakeLock();
+      noteEl.textContent = '';
     }
 
     function stop(){
-      isRunning = false; if(timerID){ clearInterval(timerID); timerID = null; }
-      startStopBtn.firstElementChild.textContent = 'Start'; startStopBtn.setAttribute('aria-pressed','false');
-      const beatsPerCycle = clamp(parseInt(beatsPerCycleInput.value,10)||4,1,16); readout.textContent = `${bpmInput.value} BPM • stopped at beat ${beatCounter}/${beatsPerCycle}`;
-      progress.style.width = '0%'; if(sessionInterval){ clearInterval(sessionInterval); sessionInterval=null; }
+      isPlaying = false;
+
+      clearInterval(schedTimer);
+      schedTimer = null;
+
+      stopTimerOnly();
+      countdownEl.textContent = '';
+
+      playBtn.classList.remove('stop');
+      playBtn.setAttribute('aria-pressed', 'false');
+      playBtn.setAttribute('aria-label', 'Start');
+
+      releaseWakeLock();
     }
 
-    function endSession(){ stop(); if(!audioCtx) return; const when = audioCtx.currentTime + 0.05; bellPing(when, true); countdown.textContent = '00:00'; }
-    function updateCountdown(){ const ms = Math.max(0, sessionEndsAt - Date.now()); const totalSec = Math.ceil(ms/1000); const m = Math.floor(totalSec/60).toString().padStart(2,'0'); const s = (totalSec%60).toString().padStart(2,'0'); countdown.textContent = `${m}:${s}`; }
-
-    startStopBtn.addEventListener('click', ()=>{ if(!isRunning) start(); else stop(); });
-
-    // Tap tempo
-    const taps = []; tapBtn.addEventListener('click', ()=>{ const now = performance.now(); taps.push(now); if(taps.length>6) taps.shift(); if(taps.length>=2){ const intervals=[]; for(let i=1;i<taps.length;i++){ const d=taps[i]-taps[i-1]; if(d>200 && d<3000) intervals.push(d);} if(intervals.length){ const avg = intervals.reduce((a,b)=>a+b,0)/intervals.length; const bpm = clamp(Math.round(60000/avg),20,240); bpmInput.value=bpm; bpmSlider.value=bpm; updateReadout(); } } });
-
-    function updateReadout(){ const beatsPerCycle = clamp(parseInt(beatsPerCycleInput.value,10)||4,1,16); readout.textContent = `${bpmInput.value} BPM` + (isRunning? ` • beat ${beatCounter}/${beatsPerCycle}` : ''); }
-
-    // BPM +/- with press-and-hold (Pointer Events, no double fire)
-    function setBPM(v){ bpmInput.value=v; bpmSlider.value=v; updateReadout(); }
-
-    let bpmHoldTimer=null, bpmRepeatTimer=null;
-    function startHold(e, delta){
-    e.preventDefault();
-    const step = e.shiftKey ? delta*5 : delta;
-    nudge(step);                                  // immediate
-    clearTimeout(bpmHoldTimer); clearInterval(bpmRepeatTimer);
-    bpmHoldTimer = setTimeout(()=>{               // after 300ms, start repeating
-        bpmRepeatTimer = setInterval(()=> nudge(step), 80);
-    }, 300);
-
-    function nudge(s){
-        const current = parseInt(bpmInput.value,10)||60;
-        const next = clamp(current + s, 20, 240);
-        setBPM(next);
-    }
-    }
-    function endHold(){
-    clearTimeout(bpmHoldTimer); clearInterval(bpmRepeatTimer);
-    bpmHoldTimer=null; bpmRepeatTimer=null;
-    }
-
-    bpmMinus.addEventListener('pointerdown', e=> startHold(e, -1));
-    bpmPlus .addEventListener('pointerdown', e=> startHold(e, +1));
-    ['pointerup','pointercancel','mouseleave'].forEach(ev=>{
-    bpmMinus.addEventListener(ev, endHold);
-    bpmPlus .addEventListener(ev, endHold);
+    playBtn.addEventListener('click', () => {
+      if (!isPlaying) start();
+      else stop();
     });
 
-    // Beats-per-cycle +/- with press-and-hold (Pointer Events)
-    function setBeatsPerCycle(v){
-    const next = clamp(parseInt(v,10)||4, 1, 16);
-    beatsPerCycleInput.value = next;
-    updateReadout();
-    }
-
-    let bcHoldTimer=null, bcRepeatTimer=null;
-    function startHoldCycle(e, delta){
-    e.preventDefault();
-    const step = e.shiftKey ? delta*2 : delta;   // Shift steps by 2
-    nudge(step);                                  // immediate
-    clearTimeout(bcHoldTimer); clearInterval(bcRepeatTimer);
-    bcHoldTimer = setTimeout(()=>{
-        bcRepeatTimer = setInterval(()=> nudge(step), 110);
-    }, 300);
-
-    function nudge(s){
-        const cur = parseInt(beatsPerCycleInput.value,10)||4;
-        setBeatsPerCycle(cur + s);
-    }
-    }
-    function endHoldCycle(){
-    clearTimeout(bcHoldTimer); clearInterval(bcRepeatTimer);
-    bcHoldTimer=null; bcRepeatTimer=null;
-    }
-
-    bcMinus.addEventListener('pointerdown', e=> startHoldCycle(e, -1));
-    bcPlus .addEventListener('pointerdown', e=> startHoldCycle(e, +1));
-    ['pointerup','pointercancel','mouseleave'].forEach(ev=>{
-    bcMinus.addEventListener(ev, endHoldCycle);
-    bcPlus .addEventListener(ev, endHoldCycle);
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space'){
+        e.preventDefault();
+        playBtn.click();
+      }
     });
 
+    function claveTok(time, isAccent){
+      const acc = isAccent ? 1.0 : 0.65;
 
-    // Keyboard shortcuts
-    window.addEventListener('keydown', (e)=>{ if(e.code==='Space'){ e.preventDefault(); startStopBtn.click(); } if(e.key==='ArrowUp'){ setBPM(clamp(parseInt(bpmInput.value,10)+1,1,240)); } if(e.key==='ArrowDown'){ setBPM(clamp(parseInt(bpmInput.value,10)-1,1,240)); } });
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(isAccent ? 2600 : 2200, time);
 
-    // Wake audio on first gesture (mobile Safari etc.)
-    ['click','touchstart'].forEach(ev=>{ window.addEventListener(ev, ()=>{ if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }, {once:true}); });
+      const env = audioCtx.createGain();
+      env.gain.setValueAtTime(0.0001, time);
+      env.gain.exponentialRampToValueAtTime(acc, time + 0.002);
+      env.gain.exponentialRampToValueAtTime(0.0001, time + 0.06);
+
+      const nbuf = audioCtx.createBuffer(1, 256, audioCtx.sampleRate);
+      const ch = nbuf.getChannelData(0);
+      for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1);
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = nbuf;
+
+      const bp = audioCtx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 3200;
+      bp.Q.value = 8;
+
+      const nGain = audioCtx.createGain();
+      nGain.gain.setValueAtTime(isAccent ? 0.18 : 0.12, time);
+      nGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
+
+      osc.connect(env);
+      env.connect(masterGain);
+
+      noise.connect(bp);
+      bp.connect(nGain);
+      nGain.connect(masterGain);
+
+      osc.start(time);
+      osc.stop(time + 0.08);
+
+      noise.start(time);
+      noise.stop(time + 0.06);
+    }
+
+    setBpm(60);
   </script>
 </body>
 </html>
