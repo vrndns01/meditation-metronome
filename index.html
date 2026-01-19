@@ -179,14 +179,8 @@
     .cycleHeader{
       display:flex;
       align-items:center;
-      justify-content:center;
-      gap:8px;
-      white-space:nowrap;   /* prevents line break */
-    }
-
-    .cycleLabel{
-      font-size:12px;
-      color:var(--muted);
+      justify-content:center; /* keeps it visually centered */
+      gap:8px;               /* 👈 single-space feel */
     }
 
     .cycleCount{
@@ -233,7 +227,7 @@
 <<<<<<< HEAD
         <div style="display:flex; justify-content:space-between; align-items:center">
           <div class="cycleHeader">
-            <span class="cycleLabel">Beats per cycle</span>
+            <span class="label">Beats per cycle</span>
             <span class="cycleCount" id="beatCounter">Beats: 0 · Sets: 0</span>
           </div>
         </div>
@@ -303,10 +297,14 @@
     const countdownEl = document.getElementById('countdown');
     const noteEl = document.getElementById('note');
 <<<<<<< HEAD
+<<<<<<< HEAD
     const counterEl = document.getElementById('beatCounter');
 
 =======
 >>>>>>> parent of 7365d29 (Simplify metronome UI and add timer + counters)
+=======
+    const counterEl = document.getElementById('counter');
+>>>>>>> parent of bec0498 (Bugs fixed)
 
     function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
@@ -572,10 +570,8 @@
     }
 
     function updateCounter(){
-    if (!counterEl) return;
     counterEl.textContent = `Beats: ${totalBeats} · Sets: ${totalSets}`;
-  }
-
+    }
 
 =======
 >>>>>>> parent of 7365d29 (Simplify metronome UI and add timer + counters)
