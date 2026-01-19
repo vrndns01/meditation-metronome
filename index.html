@@ -230,12 +230,15 @@
       </div>
 
       <div class="section">
+<<<<<<< HEAD
         <div style="display:flex; justify-content:space-between; align-items:center">
           <div class="cycleHeader">
             <span class="cycleLabel">Beats per cycle</span>
             <span class="cycleCount" id="beatCounter">Beats: 0 · Sets: 0</span>
           </div>
         </div>
+        <p class="label">Beats per cycle</p>
+>>>>>>> parent of 7365d29 (Simplify metronome UI and add timer + counters)
         <div class="rowButtons" id="cycleBtns" role="group" aria-label="Beats per cycle">
           <button class="btn" data-cycle="3">3</button>
           <button class="btn selected" data-cycle="4">4</button>
@@ -285,9 +288,6 @@
 
     let wakeLock = null;
 
-    let totalBeats = 0;
-    let totalSets = 0;
-
     const playBtn = document.getElementById('play');
     const bpmBig = document.getElementById('bpmBig');
     const bpmSlider = document.getElementById('bpmSlider');
@@ -298,8 +298,11 @@
     const timerBtns = document.getElementById('timerBtns');
     const countdownEl = document.getElementById('countdown');
     const noteEl = document.getElementById('note');
+<<<<<<< HEAD
     const counterEl = document.getElementById('beatCounter');
 
+=======
+>>>>>>> parent of 7365d29 (Simplify metronome UI and add timer + counters)
 
     function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
@@ -410,7 +413,6 @@
     }
 
     function stopFromTimer(){
-      timerEndSound();
       stop();
       countdownEl.textContent = '00:00';
     }
@@ -445,13 +447,6 @@
         const isAccent = (beatIndex === 0);
         claveTok(nextNoteTime, isAccent);
 
-        // counters
-        totalBeats++;
-        if (isAccent && totalBeats > 1) {
-          totalSets++;
-        }
-        updateCounter();
-
         const spb = 60 / bpm;
         nextNoteTime += spb;
 
@@ -460,9 +455,6 @@
     }
 
     function start(){
-      totalBeats = 0;
-      totalSets = 0;
-      updateCounter();
       ensureAudio();
       if (audioCtx.state === 'suspended') audioCtx.resume();
 
@@ -485,10 +477,6 @@
     }
 
     function stop(){
-      totalBeats = 0;
-      totalSets = 0;
-      updateCounter();
-      
       isPlaying = false;
 
       clearInterval(schedTimer);
@@ -558,6 +546,7 @@
       noise.stop(time + 0.06);
     }
 
+<<<<<<< HEAD
     function timerEndSound(){
       const time = audioCtx.currentTime + 0.05;
 
@@ -584,6 +573,8 @@
   }
 
 
+=======
+>>>>>>> parent of 7365d29 (Simplify metronome UI and add timer + counters)
     setBpm(60);
   </script>
 </body>
