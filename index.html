@@ -179,8 +179,14 @@
     .cycleHeader{
       display:flex;
       align-items:center;
-      justify-content:center; /* keeps it visually centered */
-      gap:8px;               /* 👈 single-space feel */
+      justify-content:center;
+      gap:8px;
+      white-space:nowrap;   /* prevents line break */
+    }
+
+    .cycleLabel{
+      font-size:12px;
+      color:var(--muted);
     }
 
     .cycleCount{
@@ -226,7 +232,7 @@
       <div class="section">
         <div style="display:flex; justify-content:space-between; align-items:center">
           <div class="cycleHeader">
-            <span class="label">Beats per cycle</span>
+            <span class="cycleLabel">Beats per cycle</span>
             <span class="cycleCount" id="beatCounter">Beats: 0 · Sets: 0</span>
           </div>
         </div>
@@ -292,7 +298,8 @@
     const timerBtns = document.getElementById('timerBtns');
     const countdownEl = document.getElementById('countdown');
     const noteEl = document.getElementById('note');
-    const counterEl = document.getElementById('counter');
+    const counterEl = document.getElementById('beatCounter');
+
 
     function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
@@ -572,8 +579,10 @@
     }
 
     function updateCounter(){
+    if (!counterEl) return;
     counterEl.textContent = `Beats: ${totalBeats} · Sets: ${totalSets}`;
-    }
+  }
+
 
     setBpm(60);
   </script>
