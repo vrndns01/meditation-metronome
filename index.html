@@ -175,6 +175,19 @@
       .play{height:92px}
       .rowButtons .btn{min-width:54px}
     }
+
+    .cycleHeader{
+      display:flex;
+      align-items:center;
+      justify-content:center; /* keeps it visually centered */
+      gap:8px;               /* 👈 single-space feel */
+    }
+
+    .cycleCount{
+      font-size:12px;
+      color:var(--muted);
+    }
+
   </style>
 </head>
 
@@ -212,10 +225,10 @@
 
       <div class="section">
         <div style="display:flex; justify-content:space-between; align-items:center">
-          <p class="label" style="margin:0">Beats per cycle</p>
-          <span id="counter" style="font-size:12px; color:var(--muted)">
-            Beats: 0 · Sets: 0
-          </span>
+          <div class="cycleHeader">
+            <span class="label">Beats per cycle</span>
+            <span class="cycleCount" id="beatCounter">Beats: 0 · Sets: 0</span>
+          </div>
         </div>
         <div class="rowButtons" id="cycleBtns" role="group" aria-label="Beats per cycle">
           <button class="btn" data-cycle="3">3</button>
