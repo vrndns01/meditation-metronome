@@ -177,23 +177,23 @@ font-size:12px;
 }
 
 .cycleHeader{
-display:flex;
-align-items:center;
-      justify-content:center; /* keeps it visually centered */
-      gap:8px;               /* 👈 single-space feel */
-      justify-content:center;
-      gap:8px;
-      white-space:nowrap;   /* prevents line break */
-    }
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
 
-    .cycleLabel{
-      font-size:12px;
-      color:var(--muted);
+.cycleTitle{
+  font-size:12px;
+  color:var(--muted);
+  letter-spacing:.2px;
 }
 
 .cycleCount{
-font-size:12px;
-color:var(--muted);
+  font-size:12px;
+  color:var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space:nowrap;
 }
 
 </style>
@@ -232,22 +232,20 @@ color:var(--muted);
 </div>
 
 <div class="section">
-<div style="display:flex; justify-content:space-between; align-items:center">
-<div class="cycleHeader">
-            <span class="label">Beats per cycle</span>
-            <span class="cycleLabel">Beats per cycle</span>
-<span class="cycleCount" id="beatCounter">Beats: 0 · Sets: 0</span>
-</div>
-</div>
-<div class="rowButtons" id="cycleBtns" role="group" aria-label="Beats per cycle">
-<button class="btn" data-cycle="3">3</button>
-<button class="btn selected" data-cycle="4">4</button>
-<button class="btn" data-cycle="5">5</button>
-<button class="btn" data-cycle="6">6</button>
-<button class="btn" data-cycle="7">7</button>
-<button class="btn" data-cycle="8">8</button>
-<button class="btn" data-cycle="9">9</button>
-</div>
+  <div class="cycleHeader">
+    <span class="cycleTitle">Beats per cycle</span>
+    <span class="cycleCount" id="beatCounter">Beats: 0 · Sets: 0</span>
+  </div>
+
+  <div class="rowButtons" id="cycleBtns" role="group" aria-label="Beats per cycle">
+    <button class="btn" data-cycle="3">3</button>
+    <button class="btn selected" data-cycle="4">4</button>
+    <button class="btn" data-cycle="5">5</button>
+    <button class="btn" data-cycle="6">6</button>
+    <button class="btn" data-cycle="7">7</button>
+    <button class="btn" data-cycle="8">8</button>
+    <button class="btn" data-cycle="9">9</button>
+  </div>
 </div>
 
 <div class="section">
@@ -301,8 +299,7 @@ const cycleBtns = document.getElementById('cycleBtns');
 const timerBtns = document.getElementById('timerBtns');
 const countdownEl = document.getElementById('countdown');
 const noteEl = document.getElementById('note');
-    const counterEl = document.getElementById('counter');
-    const counterEl = document.getElementById('beatCounter');
+const counterEl = document.getElementById('beatCounter');
 
 
 function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
@@ -451,8 +448,8 @@ claveTok(nextNoteTime, isAccent);
 
 // counters
 totalBeats++;
-if (isAccent && totalBeats > 1) {
-totalSets++;
+if (isAccent && beatIndex === 0 && totalBeats > 0) {
+  totalSets++;
 }
 updateCounter();
 
@@ -563,6 +560,7 @@ noise.stop(time + 0.06);
 }
 
 function timerEndSound(){
+if (!audioCtx) return;
 const time = audioCtx.currentTime + 0.05;
 
 const osc = audioCtx.createOscillator();
@@ -586,7 +584,6 @@ function updateCounter(){
     if (!counterEl) return;
 counterEl.textContent = `Beats: ${totalBeats} · Sets: ${totalSets}`;
     }
-  }
 
 
 setBpm(60);
