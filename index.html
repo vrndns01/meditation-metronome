@@ -211,7 +211,12 @@
       </div>
 
       <div class="section">
-        <p class="label">Beats per cycle</p>
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <p class="label" style="margin:0">Beats per cycle</p>
+          <span id="counter" style="font-size:12px; color:var(--muted)">
+            Beats: 0 · Sets: 0
+          </span>
+        </div>
         <div class="rowButtons" id="cycleBtns" role="group" aria-label="Beats per cycle">
           <button class="btn" data-cycle="3">3</button>
           <button class="btn selected" data-cycle="4">4</button>
@@ -261,6 +266,9 @@
 
     let wakeLock = null;
 
+    let totalBeats = 0;
+    let totalSets = 0;
+
     const playBtn = document.getElementById('play');
     const bpmBig = document.getElementById('bpmBig');
     const bpmSlider = document.getElementById('bpmSlider');
@@ -271,6 +279,7 @@
     const timerBtns = document.getElementById('timerBtns');
     const countdownEl = document.getElementById('countdown');
     const noteEl = document.getElementById('note');
+    const counterEl = document.getElementById('counter');
 
     function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
@@ -381,6 +390,7 @@
     }
 
     function stopFromTimer(){
+      timerEndSound();
       stop();
       countdownEl.textContent = '00:00';
     }
@@ -415,6 +425,13 @@
         const isAccent = (beatIndex === 0);
         claveTok(nextNoteTime, isAccent);
 
+        // counters
+        totalBeats++;
+        if (isAccent && totalBeats > 1) {
+          totalSets++;
+        }
+        updateCounter();
+
         const spb = 60 / bpm;
         nextNoteTime += spb;
 
@@ -423,6 +440,9 @@
     }
 
     function start(){
+      totalBeats = 0;
+      totalSets = 0;
+      updateCounter();
       ensureAudio();
       if (audioCtx.state === 'suspended') audioCtx.resume();
 
@@ -445,6 +465,10 @@
     }
 
     function stop(){
+      totalBeats = 0;
+      totalSets = 0;
+      updateCounter();
+      
       isPlaying = false;
 
       clearInterval(schedTimer);
@@ -512,6 +536,30 @@
 
       noise.start(time);
       noise.stop(time + 0.06);
+    }
+
+    function timerEndSound(){
+      const time = audioCtx.currentTime + 0.05;
+
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, time);
+      osc.frequency.exponentialRampToValueAtTime(440, time + 0.6);
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.0001, time);
+      gain.gain.exponentialRampToValueAtTime(0.6, time + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.8);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+
+      osc.start(time);
+      osc.stop(time + 0.9);
+    }
+
+    function updateCounter(){
+    counterEl.textContent = `Beats: ${totalBeats} · Sets: ${totalSets}`;
     }
 
     setBpm(60);
