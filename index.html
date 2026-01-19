@@ -1,581 +1,595 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Meditation Metronome</title>
-  <style>
-    :root{
-      --bg:#0b0f16;
-      --panel:#0f1624;
-      --ink:#e8eefc;
-      --muted:#a6b0c3;
-      --line:rgba(255,255,255,.12);
-      --accent:#7c5cff;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color:var(--ink);
-      background:
-        radial-gradient(1200px 900px at 50% 20%, rgba(124,92,255,.18), transparent 55%),
-        radial-gradient(900px 700px at 50% 70%, rgba(255,255,255,.06), transparent 60%),
-        var(--bg);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:28px 16px;
-    }
-    .wrap{width:min(680px, 92vw)}
-    .title{font-weight:700; letter-spacing:.2px; margin:0; text-align:center}
-    .sub{margin:8px 0 22px; color:var(--muted); text-align:center; font-size:13px}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meditation Metronome</title>
+<style>
+:root{
+--bg:#0b0f16;
+--panel:#0f1624;
+--ink:#e8eefc;
+--muted:#a6b0c3;
+--line:rgba(255,255,255,.12);
+--accent:#7c5cff;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+margin:0;
+font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+color:var(--ink);
+background:
+radial-gradient(1200px 900px at 50% 20%, rgba(124,92,255,.18), transparent 55%),
+radial-gradient(900px 700px at 50% 70%, rgba(255,255,255,.06), transparent 60%),
+var(--bg);
+display:flex;
+align-items:center;
+justify-content:center;
+padding:28px 16px;
+}
+.wrap{width:min(680px, 92vw)}
+.title{font-weight:700; letter-spacing:.2px; margin:0; text-align:center}
+.sub{margin:8px 0 22px; color:var(--muted); text-align:center; font-size:13px}
 
-    .panel{
-      background:rgba(15,22,36,.55);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:18px;
-      box-shadow:0 30px 90px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-    }
+.panel{
+background:rgba(15,22,36,.55);
+border:1px solid var(--line);
+border-radius:18px;
+padding:18px;
+box-shadow:0 30px 90px rgba(0,0,0,.45);
+backdrop-filter: blur(10px);
+}
 
-    .play{
-      width:100%;
-      height:96px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.18);
-      color:var(--ink);
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      transition: transform .05s ease;
-      user-select:none;
-      touch-action: manipulation;
-    }
-    .play:active{transform:scale(.99)}
-    .play .icon{
-      width:0;height:0;
-      border-top:16px solid transparent;
-      border-bottom:16px solid transparent;
-      border-left:26px solid rgba(232,238,252,.92);
-      margin-left:6px;
-    }
-    .play.stop .icon{
-      width:26px;height:26px;
-      border:0;
-      background:rgba(232,238,252,.92);
-      border-radius:6px;
-      margin:0;
-    }
+.play{
+width:100%;
+height:96px;
+border-radius:14px;
+border:1px solid var(--line);
+background:rgba(0,0,0,.18);
+color:var(--ink);
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+transition: transform .05s ease;
+user-select:none;
+touch-action: manipulation;
+}
+.play:active{transform:scale(.99)}
+.play .icon{
+width:0;height:0;
+border-top:16px solid transparent;
+border-bottom:16px solid transparent;
+border-left:26px solid rgba(232,238,252,.92);
+margin-left:6px;
+}
+.play.stop .icon{
+width:26px;height:26px;
+border:0;
+background:rgba(232,238,252,.92);
+border-radius:6px;
+margin:0;
+}
 
-    .section{margin-top:18px}
-    .label{
-      font-size:12px;
-      color:var(--muted);
-      margin:0 0 10px;
-      text-align:center;
-      letter-spacing:.2px;
-    }
+.section{margin-top:18px}
+.label{
+font-size:12px;
+color:var(--muted);
+margin:0 0 10px;
+text-align:center;
+letter-spacing:.2px;
+}
 
-    .bpmRow{
-      display:grid;
-      grid-template-columns:56px 1fr 56px;
-      gap:14px;
-      align-items:center;
-    }
-    .big{
-      font-size:86px;
-      font-weight:650;
-      text-align:center;
-      margin:8px 0 6px;
-      font-variant-numeric: tabular-nums;
-    }
+.bpmRow{
+display:grid;
+grid-template-columns:56px 1fr 56px;
+gap:14px;
+align-items:center;
+}
+.big{
+font-size:86px;
+font-weight:650;
+text-align:center;
+margin:8px 0 6px;
+font-variant-numeric: tabular-nums;
+}
 
-    .btn{
-      height:54px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.12);
-      color:var(--ink);
-      cursor:pointer;
-      font-size:18px;
-      user-select:none;
-      touch-action: manipulation;
-    }
-    .btn:active{background:rgba(255,255,255,.06)}
-    .btn.selected{
-      border-color: rgba(124,92,255,.55);
-      box-shadow: 0 0 0 2px rgba(124,92,255,.18) inset;
-    }
+.btn{
+height:54px;
+border-radius:12px;
+border:1px solid var(--line);
+background:rgba(0,0,0,.12);
+color:var(--ink);
+cursor:pointer;
+font-size:18px;
+user-select:none;
+touch-action: manipulation;
+}
+.btn:active{background:rgba(255,255,255,.06)}
+.btn.selected{
+border-color: rgba(124,92,255,.55);
+box-shadow: 0 0 0 2px rgba(124,92,255,.18) inset;
+}
 
-    input[type="range"]{
-      width:100%;
-      accent-color: var(--ink);
-      height:22px;
-    }
-    .rangeRow{
-      margin-top:10px;
-      padding:0 4px;
-    }
-    .rangeMeta{
-      display:flex;
-      justify-content:space-between;
-      color:var(--muted);
-      font-size:12px;
-      margin-top:6px;
-    }
+input[type="range"]{
+width:100%;
+accent-color: var(--ink);
+height:22px;
+}
+.rangeRow{
+margin-top:10px;
+padding:0 4px;
+}
+.rangeMeta{
+display:flex;
+justify-content:space-between;
+color:var(--muted);
+font-size:12px;
+margin-top:6px;
+}
 
-    .grid{
-      display:grid;
-      gap:14px;
-    }
-    .rowButtons{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:center;
-    }
-    .rowButtons .btn{
-      height:44px;
-      padding:0 14px;
-      font-size:14px;
-      min-width:58px;
-    }
+.grid{
+display:grid;
+gap:14px;
+}
+.rowButtons{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+}
+.rowButtons .btn{
+height:44px;
+padding:0 14px;
+font-size:14px;
+min-width:58px;
+}
 
-    .timerBar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-top:10px;
-    }
-    .countdown{
-      font-variant-numeric: tabular-nums;
-      color:var(--muted);
-      font-size:13px;
-      text-align:right;
-      min-width:64px;
-    }
+.timerBar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+margin-top:10px;
+}
+.countdown{
+font-variant-numeric: tabular-nums;
+color:var(--muted);
+font-size:13px;
+text-align:right;
+min-width:64px;
+}
 
-    .note{
-      margin-top:14px;
-      text-align:center;
-      color:var(--muted);
-      font-size:12px;
-    }
+.note{
+margin-top:14px;
+text-align:center;
+color:var(--muted);
+font-size:12px;
+}
 
-    @media (max-width: 520px){
-      .big{font-size:74px}
-      .bpmRow{grid-template-columns:52px 1fr 52px; gap:10px}
-      .btn{height:52px}
-      .play{height:92px}
-      .rowButtons .btn{min-width:54px}
-    }
+@media (max-width: 520px){
+.big{font-size:74px}
+.bpmRow{grid-template-columns:52px 1fr 52px; gap:10px}
+.btn{height:52px}
+.play{height:92px}
+.rowButtons .btn{min-width:54px}
+}
 
-    .cycleHeader{
-      display:flex;
-      align-items:center;
+.cycleHeader{
+display:flex;
+align-items:center;
       justify-content:center; /* keeps it visually centered */
       gap:8px;               /* 👈 single-space feel */
+      justify-content:center;
+      gap:8px;
+      white-space:nowrap;   /* prevents line break */
     }
 
-    .cycleCount{
+    .cycleLabel{
       font-size:12px;
       color:var(--muted);
-    }
+}
 
-  </style>
+.cycleCount{
+font-size:12px;
+color:var(--muted);
+}
+
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <h1 class="title">Meditation Metronome</h1>
-    <p class="sub">Use metronome beats to concentrate and calm by adjusting the BPM.</p>
+<div class="wrap">
+<h1 class="title">Meditation Metronome</h1>
+<p class="sub">Use metronome beats to concentrate and calm by adjusting the BPM.</p>
 
-    <div class="panel">
-      <button id="play" class="play" aria-pressed="false" aria-label="Start">
-        <span class="icon" aria-hidden="true"></span>
-      </button>
+<div class="panel">
+<button id="play" class="play" aria-pressed="false" aria-label="Start">
+<span class="icon" aria-hidden="true"></span>
+</button>
 
-      <div class="section">
-        <p class="label">Beats per minute</p>
-        <div class="big" id="bpmBig">60</div>
+<div class="section">
+<p class="label">Beats per minute</p>
+<div class="big" id="bpmBig">60</div>
 
-        <div class="bpmRow">
-          <button id="bpmMinus" class="btn" aria-label="Decrease BPM">−</button>
-          <div class="rangeRow">
-            <input id="bpmSlider" type="range" min="10" max="200" step="1" value="60" aria-label="BPM slider" />
-            <div class="rangeMeta"><span>10</span><span>200</span></div>
-          </div>
-          <button id="bpmPlus" class="btn" aria-label="Increase BPM">+</button>
-        </div>
-      </div>
+<div class="bpmRow">
+<button id="bpmMinus" class="btn" aria-label="Decrease BPM">−</button>
+<div class="rangeRow">
+<input id="bpmSlider" type="range" min="10" max="200" step="1" value="60" aria-label="BPM slider" />
+<div class="rangeMeta"><span>10</span><span>200</span></div>
+</div>
+<button id="bpmPlus" class="btn" aria-label="Increase BPM">+</button>
+</div>
+</div>
 
-      <div class="section">
-        <p class="label">Volume</p>
-        <div class="rangeRow">
-          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.6" aria-label="Volume slider" />
-          <div class="rangeMeta"><span>0</span><span>100</span></div>
-        </div>
-      </div>
+<div class="section">
+<p class="label">Volume</p>
+<div class="rangeRow">
+<input id="vol" type="range" min="0" max="1" step="0.01" value="0.6" aria-label="Volume slider" />
+<div class="rangeMeta"><span>0</span><span>100</span></div>
+</div>
+</div>
 
-      <div class="section">
-<<<<<<< HEAD
-        <div style="display:flex; justify-content:space-between; align-items:center">
-          <div class="cycleHeader">
+<div class="section">
+<div style="display:flex; justify-content:space-between; align-items:center">
+<div class="cycleHeader">
             <span class="label">Beats per cycle</span>
-            <span class="cycleCount" id="beatCounter">Beats: 0 · Sets: 0</span>
-          </div>
-        </div>
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 58e29e3 (Update index.html)
-        <p class="label">Beats per cycle</p>
->>>>>>> parent of 7365d29 (Simplify metronome UI and add timer + counters)
-        <div class="rowButtons" id="cycleBtns" role="group" aria-label="Beats per cycle">
-          <button class="btn" data-cycle="3">3</button>
-          <button class="btn selected" data-cycle="4">4</button>
-          <button class="btn" data-cycle="5">5</button>
-          <button class="btn" data-cycle="6">6</button>
-          <button class="btn" data-cycle="7">7</button>
-          <button class="btn" data-cycle="8">8</button>
-          <button class="btn" data-cycle="9">9</button>
-        </div>
-      </div>
+            <span class="cycleLabel">Beats per cycle</span>
+<span class="cycleCount" id="beatCounter">Beats: 0 · Sets: 0</span>
+</div>
+</div>
+<div class="rowButtons" id="cycleBtns" role="group" aria-label="Beats per cycle">
+<button class="btn" data-cycle="3">3</button>
+<button class="btn selected" data-cycle="4">4</button>
+<button class="btn" data-cycle="5">5</button>
+<button class="btn" data-cycle="6">6</button>
+<button class="btn" data-cycle="7">7</button>
+<button class="btn" data-cycle="8">8</button>
+<button class="btn" data-cycle="9">9</button>
+</div>
+</div>
 
-      <div class="section">
-        <div class="timerBar">
-          <p class="label" style="margin:0; text-align:left">Timer</p>
-          <div class="countdown" id="countdown"> </div>
-        </div>
-        <div class="rowButtons" id="timerBtns" role="group" aria-label="Timer options">
-          <button class="btn selected" data-sec="0">Off</button>
-          <button class="btn" data-sec="300">5 min</button>
-          <button class="btn" data-sec="600">10 min</button>
-          <button class="btn" data-sec="900">15 min</button>
-          <button class="btn" data-sec="1800">30 min</button>
-          <button class="btn" data-sec="3600">1 hour</button>
-        </div>
-      </div>
+<div class="section">
+<div class="timerBar">
+<p class="label" style="margin:0; text-align:left">Timer</p>
+<div class="countdown" id="countdown"> </div>
+</div>
+<div class="rowButtons" id="timerBtns" role="group" aria-label="Timer options">
+<button class="btn selected" data-sec="0">Off</button>
+<button class="btn" data-sec="300">5 min</button>
+<button class="btn" data-sec="600">10 min</button>
+<button class="btn" data-sec="900">15 min</button>
+<button class="btn" data-sec="1800">30 min</button>
+<button class="btn" data-sec="3600">1 hour</button>
+</div>
+</div>
 
-      <div class="note" id="note"></div>
-    </div>
-  </div>
+<div class="note" id="note"></div>
+</div>
+</div>
 
-  <script>
-    let audioCtx, masterGain;
-    let isPlaying = false;
+<script>
+let audioCtx, masterGain;
+let isPlaying = false;
 
-    let bpm = 60;
-    let cycle = 4;
+let bpm = 60;
+let cycle = 4;
 
-    let beatIndex = 0;
-    let nextNoteTime = 0;
-    const lookaheadMs = 25;
-    const scheduleAhead = 0.12;
-    let schedTimer = null;
+let beatIndex = 0;
+let nextNoteTime = 0;
+const lookaheadMs = 25;
+const scheduleAhead = 0.12;
+let schedTimer = null;
 
-    let timerChoiceSec = 0;
-    let timerEndsAt = 0;
-    let timerTick = null;
+let timerChoiceSec = 0;
+let timerEndsAt = 0;
+let timerTick = null;
 
-    let wakeLock = null;
+let wakeLock = null;
 
-    const playBtn = document.getElementById('play');
-    const bpmBig = document.getElementById('bpmBig');
-    const bpmSlider = document.getElementById('bpmSlider');
-    const bpmMinus = document.getElementById('bpmMinus');
-    const bpmPlus = document.getElementById('bpmPlus');
-    const volSlider = document.getElementById('vol');
-    const cycleBtns = document.getElementById('cycleBtns');
-    const timerBtns = document.getElementById('timerBtns');
-    const countdownEl = document.getElementById('countdown');
-    const noteEl = document.getElementById('note');
-<<<<<<< HEAD
-<<<<<<< HEAD
+let totalBeats = 0;
+let totalSets = 0;
+
+const playBtn = document.getElementById('play');
+const bpmBig = document.getElementById('bpmBig');
+const bpmSlider = document.getElementById('bpmSlider');
+const bpmMinus = document.getElementById('bpmMinus');
+const bpmPlus = document.getElementById('bpmPlus');
+const volSlider = document.getElementById('vol');
+const cycleBtns = document.getElementById('cycleBtns');
+const timerBtns = document.getElementById('timerBtns');
+const countdownEl = document.getElementById('countdown');
+const noteEl = document.getElementById('note');
+    const counterEl = document.getElementById('counter');
     const counterEl = document.getElementById('beatCounter');
 
-=======
->>>>>>> parent of 7365d29 (Simplify metronome UI and add timer + counters)
-=======
-    const counterEl = document.getElementById('counter');
->>>>>>> parent of bec0498 (Bugs fixed)
 
-    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
-    function ensureAudio(){
-      if (!audioCtx){
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
-        masterGain = audioCtx.createGain();
-        masterGain.gain.value = parseFloat(volSlider.value);
-        masterGain.connect(audioCtx.destination);
-      }
+function ensureAudio(){
+if (!audioCtx){
+audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+masterGain = audioCtx.createGain();
+masterGain.gain.value = parseFloat(volSlider.value);
+masterGain.connect(audioCtx.destination);
+}
+}
+
+volSlider.addEventListener('input', () => {
+if (!masterGain) return;
+const v = parseFloat(volSlider.value);
+masterGain.gain.setTargetAtTime(v, audioCtx.currentTime, 0.01);
+});
+
+function setBpm(v){
+bpm = clamp(parseInt(v, 10) || 60, 10, 200);
+bpmBig.textContent = bpm;
+bpmSlider.value = bpm;
+}
+
+bpmSlider.addEventListener('input', (e) => setBpm(e.target.value));
+
+function startBpmHold(delta){
+const stepOnce = () => setBpm(bpm + delta);
+stepOnce();
+let holdT = setTimeout(() => {
+bpmHoldRepeat = setInterval(stepOnce, 90);
+}, 260);
+bpmHoldTimeout = holdT;
+}
+
+let bpmHoldTimeout = null;
+let bpmHoldRepeat = null;
+
+function clearBpmHold(){
+clearTimeout(bpmHoldTimeout);
+clearInterval(bpmHoldRepeat);
+bpmHoldTimeout = null;
+bpmHoldRepeat = null;
+}
+
+bpmMinus.addEventListener('pointerdown', (e) => { e.preventDefault(); startBpmHold(-1); });
+bpmPlus.addEventListener('pointerdown', (e) => { e.preventDefault(); startBpmHold(+1); });
+['pointerup','pointercancel','pointerleave','lostpointercapture'].forEach(ev => {
+bpmMinus.addEventListener(ev, clearBpmHold);
+bpmPlus.addEventListener(ev, clearBpmHold);
+});
+
+cycleBtns.addEventListener('click', (e) => {
+const btn = e.target.closest('button[data-cycle]');
+if (!btn) return;
+cycle = parseInt(btn.dataset.cycle, 10);
+[...cycleBtns.querySelectorAll('button[data-cycle]')].forEach(b => b.classList.toggle('selected', b === btn));
+});
+
+timerBtns.addEventListener('click', (e) => {
+const btn = e.target.closest('button[data-sec]');
+if (!btn) return;
+timerChoiceSec = parseInt(btn.dataset.sec, 10) || 0;
+[...timerBtns.querySelectorAll('button[data-sec]')].forEach(b => b.classList.toggle('selected', b === btn));
+
+if (!isPlaying){
+countdownEl.textContent = '';
+return;
+}
+
+if (timerChoiceSec <= 0){
+stopTimerOnly();
+countdownEl.textContent = '';
+return;
+}
+
+startTimer(timerChoiceSec);
+});
+
+function formatMMSS(sec){
+const s = Math.max(0, Math.ceil(sec));
+const mm = String(Math.floor(s / 60)).padStart(2, '0');
+const ss = String(s % 60).padStart(2, '0');
+return mm + ':' + ss;
+}
+
+function startTimer(sec){
+stopTimerOnly();
+timerEndsAt = Date.now() + sec * 1000;
+tickTimer();
+timerTick = setInterval(tickTimer, 200);
+}
+
+function tickTimer(){
+const remaining = (timerEndsAt - Date.now()) / 1000;
+if (remaining <= 0){
+countdownEl.textContent = '00:00';
+stopFromTimer();
+return;
+}
+countdownEl.textContent = formatMMSS(remaining);
+}
+
+function stopTimerOnly(){
+clearInterval(timerTick);
+timerTick = null;
+timerEndsAt = 0;
+}
+
+function stopFromTimer(){
+timerEndSound();
+stop();
+countdownEl.textContent = '00:00';
+}
+
+async function requestWakeLock(){
+try{
+if (!('wakeLock' in navigator)) return;
+wakeLock = await navigator.wakeLock.request('screen');
+wakeLock.addEventListener('release', () => {});
+}catch(err){}
+}
+
+async function releaseWakeLock(){
+try{
+if (wakeLock){
+await wakeLock.release();
+wakeLock = null;
+}
+}catch(err){}
+}
+
+document.addEventListener('visibilitychange', async () => {
+if (!isPlaying) return;
+if (document.visibilityState === 'visible'){
+await requestWakeLock();
+}
+});
+
+function scheduler(){
+const now = audioCtx.currentTime;
+while (nextNoteTime < now + scheduleAhead){
+const isAccent = (beatIndex === 0);
+claveTok(nextNoteTime, isAccent);
+
+// counters
+totalBeats++;
+if (isAccent && totalBeats > 1) {
+totalSets++;
+}
+updateCounter();
+
+const spb = 60 / bpm;
+nextNoteTime += spb;
+
+beatIndex = (beatIndex + 1) % cycle;
+}
+}
+
+function start(){
+totalBeats = 0;
+totalSets = 0;
+updateCounter();
+ensureAudio();
+if (audioCtx.state === 'suspended') audioCtx.resume();
+
+isPlaying = true;
+playBtn.classList.add('stop');
+playBtn.setAttribute('aria-pressed', 'true');
+playBtn.setAttribute('aria-label', 'Stop');
+
+beatIndex = 0;
+nextNoteTime = audioCtx.currentTime + 0.06;
+
+clearInterval(schedTimer);
+schedTimer = setInterval(scheduler, lookaheadMs);
+
+if (timerChoiceSec > 0) startTimer(timerChoiceSec);
+else countdownEl.textContent = '';
+
+requestWakeLock();
+noteEl.textContent = '';
+}
+
+function stop(){
+totalBeats = 0;
+totalSets = 0;
+updateCounter();
+
+isPlaying = false;
+
+clearInterval(schedTimer);
+schedTimer = null;
+
+stopTimerOnly();
+countdownEl.textContent = '';
+
+playBtn.classList.remove('stop');
+playBtn.setAttribute('aria-pressed', 'false');
+playBtn.setAttribute('aria-label', 'Start');
+
+releaseWakeLock();
+}
+
+playBtn.addEventListener('click', () => {
+if (!isPlaying) start();
+else stop();
+});
+
+window.addEventListener('keydown', (e) => {
+if (e.code === 'Space'){
+e.preventDefault();
+playBtn.click();
+}
+});
+
+function claveTok(time, isAccent){
+const acc = isAccent ? 1.0 : 0.65;
+
+const osc = audioCtx.createOscillator();
+osc.type = 'sine';
+osc.frequency.setValueAtTime(isAccent ? 2600 : 2200, time);
+
+const env = audioCtx.createGain();
+env.gain.setValueAtTime(0.0001, time);
+env.gain.exponentialRampToValueAtTime(acc, time + 0.002);
+env.gain.exponentialRampToValueAtTime(0.0001, time + 0.06);
+
+const nbuf = audioCtx.createBuffer(1, 256, audioCtx.sampleRate);
+const ch = nbuf.getChannelData(0);
+for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1);
+
+const noise = audioCtx.createBufferSource();
+noise.buffer = nbuf;
+
+const bp = audioCtx.createBiquadFilter();
+bp.type = 'bandpass';
+bp.frequency.value = 3200;
+bp.Q.value = 8;
+
+const nGain = audioCtx.createGain();
+nGain.gain.setValueAtTime(isAccent ? 0.18 : 0.12, time);
+nGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
+
+osc.connect(env);
+env.connect(masterGain);
+
+noise.connect(bp);
+bp.connect(nGain);
+nGain.connect(masterGain);
+
+osc.start(time);
+osc.stop(time + 0.08);
+
+noise.start(time);
+noise.stop(time + 0.06);
+}
+
+function timerEndSound(){
+const time = audioCtx.currentTime + 0.05;
+
+const osc = audioCtx.createOscillator();
+osc.type = 'sine';
+osc.frequency.setValueAtTime(880, time);
+osc.frequency.exponentialRampToValueAtTime(440, time + 0.6);
+
+const gain = audioCtx.createGain();
+gain.gain.setValueAtTime(0.0001, time);
+gain.gain.exponentialRampToValueAtTime(0.6, time + 0.02);
+gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.8);
+
+osc.connect(gain);
+gain.connect(masterGain);
+
+osc.start(time);
+osc.stop(time + 0.9);
+}
+
+function updateCounter(){
+    if (!counterEl) return;
+counterEl.textContent = `Beats: ${totalBeats} · Sets: ${totalSets}`;
     }
+  }
 
-    volSlider.addEventListener('input', () => {
-      if (!masterGain) return;
-      const v = parseFloat(volSlider.value);
-      masterGain.gain.setTargetAtTime(v, audioCtx.currentTime, 0.01);
-    });
 
-    function setBpm(v){
-      bpm = clamp(parseInt(v, 10) || 60, 10, 200);
-      bpmBig.textContent = bpm;
-      bpmSlider.value = bpm;
-    }
-
-    bpmSlider.addEventListener('input', (e) => setBpm(e.target.value));
-
-    function startBpmHold(delta){
-      const stepOnce = () => setBpm(bpm + delta);
-      stepOnce();
-      let holdT = setTimeout(() => {
-        bpmHoldRepeat = setInterval(stepOnce, 90);
-      }, 260);
-      bpmHoldTimeout = holdT;
-    }
-
-    let bpmHoldTimeout = null;
-    let bpmHoldRepeat = null;
-
-    function clearBpmHold(){
-      clearTimeout(bpmHoldTimeout);
-      clearInterval(bpmHoldRepeat);
-      bpmHoldTimeout = null;
-      bpmHoldRepeat = null;
-    }
-
-    bpmMinus.addEventListener('pointerdown', (e) => { e.preventDefault(); startBpmHold(-1); });
-    bpmPlus.addEventListener('pointerdown', (e) => { e.preventDefault(); startBpmHold(+1); });
-    ['pointerup','pointercancel','pointerleave','lostpointercapture'].forEach(ev => {
-      bpmMinus.addEventListener(ev, clearBpmHold);
-      bpmPlus.addEventListener(ev, clearBpmHold);
-    });
-
-    cycleBtns.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-cycle]');
-      if (!btn) return;
-      cycle = parseInt(btn.dataset.cycle, 10);
-      [...cycleBtns.querySelectorAll('button[data-cycle]')].forEach(b => b.classList.toggle('selected', b === btn));
-    });
-
-    timerBtns.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-sec]');
-      if (!btn) return;
-      timerChoiceSec = parseInt(btn.dataset.sec, 10) || 0;
-      [...timerBtns.querySelectorAll('button[data-sec]')].forEach(b => b.classList.toggle('selected', b === btn));
-
-      if (!isPlaying){
-        countdownEl.textContent = '';
-        return;
-      }
-
-      if (timerChoiceSec <= 0){
-        stopTimerOnly();
-        countdownEl.textContent = '';
-        return;
-      }
-
-      startTimer(timerChoiceSec);
-    });
-
-    function formatMMSS(sec){
-      const s = Math.max(0, Math.ceil(sec));
-      const mm = String(Math.floor(s / 60)).padStart(2, '0');
-      const ss = String(s % 60).padStart(2, '0');
-      return mm + ':' + ss;
-    }
-
-    function startTimer(sec){
-      stopTimerOnly();
-      timerEndsAt = Date.now() + sec * 1000;
-      tickTimer();
-      timerTick = setInterval(tickTimer, 200);
-    }
-
-    function tickTimer(){
-      const remaining = (timerEndsAt - Date.now()) / 1000;
-      if (remaining <= 0){
-        countdownEl.textContent = '00:00';
-        stopFromTimer();
-        return;
-      }
-      countdownEl.textContent = formatMMSS(remaining);
-    }
-
-    function stopTimerOnly(){
-      clearInterval(timerTick);
-      timerTick = null;
-      timerEndsAt = 0;
-    }
-
-    function stopFromTimer(){
-      stop();
-      countdownEl.textContent = '00:00';
-    }
-
-    async function requestWakeLock(){
-      try{
-        if (!('wakeLock' in navigator)) return;
-        wakeLock = await navigator.wakeLock.request('screen');
-        wakeLock.addEventListener('release', () => {});
-      }catch(err){}
-    }
-
-    async function releaseWakeLock(){
-      try{
-        if (wakeLock){
-          await wakeLock.release();
-          wakeLock = null;
-        }
-      }catch(err){}
-    }
-
-    document.addEventListener('visibilitychange', async () => {
-      if (!isPlaying) return;
-      if (document.visibilityState === 'visible'){
-        await requestWakeLock();
-      }
-    });
-
-    function scheduler(){
-      const now = audioCtx.currentTime;
-      while (nextNoteTime < now + scheduleAhead){
-        const isAccent = (beatIndex === 0);
-        claveTok(nextNoteTime, isAccent);
-
-        const spb = 60 / bpm;
-        nextNoteTime += spb;
-
-        beatIndex = (beatIndex + 1) % cycle;
-      }
-    }
-
-    function start(){
-      ensureAudio();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-
-      isPlaying = true;
-      playBtn.classList.add('stop');
-      playBtn.setAttribute('aria-pressed', 'true');
-      playBtn.setAttribute('aria-label', 'Stop');
-
-      beatIndex = 0;
-      nextNoteTime = audioCtx.currentTime + 0.06;
-
-      clearInterval(schedTimer);
-      schedTimer = setInterval(scheduler, lookaheadMs);
-
-      if (timerChoiceSec > 0) startTimer(timerChoiceSec);
-      else countdownEl.textContent = '';
-
-      requestWakeLock();
-      noteEl.textContent = '';
-    }
-
-    function stop(){
-      isPlaying = false;
-
-      clearInterval(schedTimer);
-      schedTimer = null;
-
-      stopTimerOnly();
-      countdownEl.textContent = '';
-
-      playBtn.classList.remove('stop');
-      playBtn.setAttribute('aria-pressed', 'false');
-      playBtn.setAttribute('aria-label', 'Start');
-
-      releaseWakeLock();
-    }
-
-    playBtn.addEventListener('click', () => {
-      if (!isPlaying) start();
-      else stop();
-    });
-
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space'){
-        e.preventDefault();
-        playBtn.click();
-      }
-    });
-
-    function claveTok(time, isAccent){
-      const acc = isAccent ? 1.0 : 0.65;
-
-      const osc = audioCtx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(isAccent ? 2600 : 2200, time);
-
-      const env = audioCtx.createGain();
-      env.gain.setValueAtTime(0.0001, time);
-      env.gain.exponentialRampToValueAtTime(acc, time + 0.002);
-      env.gain.exponentialRampToValueAtTime(0.0001, time + 0.06);
-
-      const nbuf = audioCtx.createBuffer(1, 256, audioCtx.sampleRate);
-      const ch = nbuf.getChannelData(0);
-      for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1);
-
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = nbuf;
-
-      const bp = audioCtx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.value = 3200;
-      bp.Q.value = 8;
-
-      const nGain = audioCtx.createGain();
-      nGain.gain.setValueAtTime(isAccent ? 0.18 : 0.12, time);
-      nGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
-
-      osc.connect(env);
-      env.connect(masterGain);
-
-      noise.connect(bp);
-      bp.connect(nGain);
-      nGain.connect(masterGain);
-
-      osc.start(time);
-      osc.stop(time + 0.08);
-
-      noise.start(time);
-      noise.stop(time + 0.06);
-    }
-
-<<<<<<< HEAD
-    function timerEndSound(){
-      const time = audioCtx.currentTime + 0.05;
-
-      const osc = audioCtx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, time);
-      osc.frequency.exponentialRampToValueAtTime(440, time + 0.6);
-
-      const gain = audioCtx.createGain();
-      gain.gain.setValueAtTime(0.0001, time);
-      gain.gain.exponentialRampToValueAtTime(0.6, time + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.8);
-
-      osc.connect(gain);
-      gain.connect(masterGain);
-
-      osc.start(time);
-      osc.stop(time + 0.9);
-    }
-
-    function updateCounter(){
-    counterEl.textContent = `Beats: ${totalBeats} · Sets: ${totalSets}`;
-    }
-
-=======
->>>>>>> parent of 7365d29 (Simplify metronome UI and add timer + counters)
-    setBpm(60);
-  </script>
+setBpm(60);
+</script>
 </body>
 </html>
