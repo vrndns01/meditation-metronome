@@ -252,6 +252,15 @@ font-size:12px;
 </div>
 
 <div class="section">
+  <p class="label">Tempo progression</p>
+  <div class="rowButtons" id="progressionBtns" role="group" aria-label="Tempo progression">
+    <button class="btn selected" data-prog="off">Off</button>
+    <button class="btn" data-prog="asc">Ascending</button>
+    <button class="btn" data-prog="desc">Descending</button>
+  </div>
+</div>
+
+<div class="section">
 <div class="timerBar">
 <p class="label" style="margin:0; text-align:left">Timer</p>
 <div class="countdown" id="countdown"> </div>
@@ -276,6 +285,7 @@ let isPlaying = false;
 
 let bpm = 60;
 let cycle = 4;
+let progression = 'off'; // 'off' | 'asc' | 'desc'
 
 let beatIndex = 0;
 let nextNoteTime = 0;
@@ -299,6 +309,7 @@ const bpmMinus = document.getElementById('bpmMinus');
 const bpmPlus = document.getElementById('bpmPlus');
 const volSlider = document.getElementById('vol');
 const cycleBtns = document.getElementById('cycleBtns');
+const progressionBtns = document.getElementById('progressionBtns');
 const timerBtns = document.getElementById('timerBtns');
 const countdownEl = document.getElementById('countdown');
 const noteEl = document.getElementById('note');
@@ -361,6 +372,13 @@ const btn = e.target.closest('button[data-cycle]');
 if (!btn) return;
 cycle = parseInt(btn.dataset.cycle, 10);
 [...cycleBtns.querySelectorAll('button[data-cycle]')].forEach(b => b.classList.toggle('selected', b === btn));
+});
+
+progressionBtns.addEventListener('click', (e) => {
+const btn = e.target.closest('button[data-prog]');
+if (!btn) return;
+progression = btn.dataset.prog;
+[...progressionBtns.querySelectorAll('button[data-prog]')].forEach(b => b.classList.toggle('selected', b === btn));
 });
 
 timerBtns.addEventListener('click', (e) => {
@@ -451,8 +469,11 @@ claveTok(nextNoteTime, isAccent);
 
 // counters
 totalBeats++;
-if (isAccent && beatIndex === 0 && totalBeats > 0) {
+if (isAccent) {
   totalSets++;
+  if (totalSets > 1 && progression !== 'off') {
+    setBpm(bpm + (progression === 'asc' ? 1 : -1));
+  }
 }
 updateCounter();
 
